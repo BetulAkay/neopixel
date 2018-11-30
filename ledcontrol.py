@@ -23,3 +23,83 @@ def SetAll(strip, color):
     """Wipe color across display a pixel at a time."""
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color)
+
+def TurnOn(strip, color):
+    for i in range(strip.numPixels()):
+        strip.setPixelColor(i, color)
+        strip.show()
+
+
+def snake(strip, color, red, green, blue, wait_ms=50):
+    """Wipe color across display a pixel at a time."""
+    for i in range(0, LED_COUNT):      #strip.numPixels()
+        strip.setPixelColor(i, color)
+        strip.show()
+        time.sleep(wait_ms / 1000.0)
+    for i in range(127, 0, -1):  # new line
+        r = int(math.floor((i / 127.0) * red))
+        g = int(math.floor((i / 127.0) * green))
+        b = int(math.floor((i / 127.0) * blue))
+        SetAll(strip, Color(r, g, b))
+        strip.show()
+        time.sleep(0.005)
+    for i in range(strip.numPixels()):
+        strip.setPixelColor(i, Color(0, 0, 0))
+    strip.show()
+
+
+def BreathInOut(strip, red, green, blue):
+    # Fade In.
+
+    for i in range(0, 127):
+        r = int(math.floor((i / 127.0) * red))
+        g = int(math.floor((i / 127.0) * green))
+        b = int(math.floor((i / 127.0) * blue))
+        SetAll(strip, Color(r, g, b))
+        strip.show()
+        time.sleep(.01)
+        # Fade Out.
+    for i in range(256, 0, -1):
+        r = int(math.floor((i / 127.0) * red))
+        g = int(math.floor((i / 127.0) * green))
+        b = int(math.floor((i / 127.0) * blue))
+        SetAll(strip, Color(r, g, b))
+        strip.show()
+        time.sleep(.01)
+
+# Main program logic follows:
+if __name__ == '__main__':
+    # Process arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--clear', action='store_true', help='clear the display on exit')
+    args = parser.parse_args()
+
+    # Create NeoPixel object with appropriate configuration.
+    strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
+    # Intialize the library (must be called once before other functions).
+    strip.begin()
+
+    print('Press Ctrl-C to quit.')
+    if not args.clear:
+        print('Use "-c" argument to clear LEDs on exit')
+
+    try:
+
+        while True:
+            print("Fading Snake")
+            snake(strip, Color(127, 127, 127), 127, 127, 127)
+            print("Breathing Effect")
+            BreathInOut(strip, 127, 127, 127)
+            print("Movements")
+            OutsideToCenter(strip, 255, 0, 0, 8, .5, .05)
+            print("meeting")
+            meeting(strip, 127, 127, 127)
+            print("TurnOn")
+            TurnOn(strip, Color(127, 127, 127))
+            print("Reversed Color Wipe")
+            ColorWipeReverse(strip, 127, 127, 127, 0.5)
+
+
+    except KeyboardInterrupt:
+        if args.clear:
+            colorWipe(strip, Color(0, 0, 0), 10)
